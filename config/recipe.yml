@@ -1,0 +1,75 @@
+# image will be published to ghcr.io/<user>/<name>
+name: shybazzite
+alt-tags: [ wm2 ]
+# description will be included in the image's metadata
+description: This is my personal OS image for the GPD Win Max 2 (2024)
+
+# the base image to build on top of (FROM) and the version tag to use
+base-image: ghcr.io/ublue-os/bazzite-deck
+image-version: stable # latest is also supported if you want new updates ASAP
+
+# module configuration, executed in order
+# you can include multiple instances of the same module
+modules:
+  - type: files
+    files:
+      - usr: /usr
+          # copies config/files/usr into your image's /usr.
+          # put configuration files you want in /etc/ on a booted system 
+          # in /usr/etc/ in the image. read more in files module reference.
+      - etc: /etc
+          # Copy yum repos to /etc
+
+  - type: rpm-ostree
+    repos:
+      - https://download.docker.com/linux/fedora/docker-ce.repo
+      - https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+    install:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - virt-manager
+      - code
+      - zerotier-one
+      - tailscale
+    remove:
+      - steam
+
+  - type: default-flatpaks
+    notify: true # Send notification after install/uninstall is finished (true/false)
+    system:
+      # If no repo information is specified, Flathub will be used by default
+      # repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
+      # repo-name: flathub
+      # repo-title: "Flathub (system-wide)" # Optional; this sets the remote's user-facing name in graphical frontends like GNOME Software
+      install:
+        - org.mozilla.firefox
+        - com.valvesoftware.Steam
+
+      remove:
+        # - org.gnome.eog
+  - type: bling
+    install:
+      - ublue-update # https://github.com/ublue-os/ublue-update
+      - 1password # install 1Password (stable) and `op` CLI tool
+      - dconf-update-service # a service unit that updates the dconf db on boot
+      - laptop # installs TLP and configures your system for laptop usage
+      - flatpaksync # allows synchronization of user-installed flatpaks, see separate documentation section
+
+  - type: fonts
+    fonts:
+      nerd-fonts:
+        - FiraCode # don't add "Nerd Font" suffix.
+        - CascadiaCode
+        - Hack
+        - SourceCodePro
+        - Terminus
+        - JetBrainsMono
+        - NerdFontsSymbolsOnly
+      google-fonts:
+        - Roboto
+        - Open Sans
+
+  - type: signing # this sets up the proper policy & signing files for signed images to work fully
