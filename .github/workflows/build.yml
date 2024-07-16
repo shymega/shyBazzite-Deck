@@ -1,0 +1,31 @@
+---
+name: build-ublue-custom
+on:
+  schedule:
+    - cron: '0 17 * * *'  # 1700 hours UTC everyday
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-push:
+    name: Build Custom Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+       # the build is fully handled by the reusable github action
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@v7
+      - name: Build Custom Image
+        uses: blue-build/github-action@v1.6.1
+        with:
+          recipe: recipe.yml
+          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
+          registry_username: ${{ github.repository_owner }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
