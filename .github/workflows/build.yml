@@ -2,8 +2,9 @@
 name: build-ublue-custom
 on:
   schedule:
-    - cron: '0 17 * * *'  # 1700 hours UTC everyday
+    - cron: '0 7 * * 2,5'  # 0700 hours, every Tue/Thu.
   push:
+    branches: [ wm2, deck, virtual ]
   workflow_dispatch:
 
 concurrency:
